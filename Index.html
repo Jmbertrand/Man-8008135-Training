@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Board</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Board">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B2126">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2126;
+    --panel:#122E34;
+    --panel-2:#173940;
+    --chalk:#EFE9DB;
+    --dim:#7E9699;
+    --sodium:#F5C242;
+    --sodium-dim:#8a6f2a;
+    --line:rgba(239,233,219,.13);
+    --plate-r:3px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(120% 60% at 50% -10%, #17383F 0%, transparent 60%);
+    color:var(--chalk);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:20px 16px 64px;
+    min-height:100vh;
+  }
+
+  .wrap{max-width:620px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  .masthead{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;padding-bottom:14px;margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .mark{
+    font-family:'Oswald','Arial Narrow','Helvetica Neue',sans-serif;font-weight:700;
+    font-size:26px;letter-spacing:.14em;text-transform:uppercase;
+    line-height:1;
+  }
+  .mark span{color:var(--sodium)}
+  .kit{
+    font-family:'IBM Plex Mono',ui-monospace,monospace;
+    font-size:10.5px;letter-spacing:.09em;color:var(--dim);
+    text-transform:uppercase;text-align:right;line-height:1.5;
+  }
+
+  /* ---------- day tabs ---------- */
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
+  .tab{
+    appearance:none;border:1px solid var(--line);background:var(--panel);
+    color:var(--dim);border-radius:var(--plate-r);cursor:pointer;
+    padding:11px 6px 10px;text-align:center;
+    font-family:'Oswald','Arial Narrow','Helvetica Neue',sans-serif;text-transform:uppercase;
+    letter-spacing:.1em;font-size:13px;font-weight:600;
+    transition:background .15s ease,color .15s ease,border-color .15s ease;
+  }
+  .tab .sub{
+    display:block;font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    font-size:9px;letter-spacing:.06em;margin-top:4px;
+    text-transform:none;opacity:.75;font-weight:400;
+  }
+  .tab:hover{color:var(--chalk);border-color:rgba(245,194,66,.35)}
+  .tab[aria-selected="true"]{
+    background:var(--sodium);color:#20180A;border-color:var(--sodium);
+  }
+  .tab:focus-visible{outline:2px solid var(--sodium);outline-offset:2px}
+
+  /* ---------- day header ---------- */
+  .dayhead{margin-bottom:6px}
+  .daytitle{
+    font-family:'Oswald','Arial Narrow','Helvetica Neue',sans-serif;font-weight:600;font-size:21px;
+    letter-spacing:.05em;text-transform:uppercase;margin:0 0 4px;
+  }
+  .daysub{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;
+    color:var(--dim);letter-spacing:.05em;margin:0 0 12px;
+  }
+  .rail{height:3px;background:rgba(239,233,219,.09);border-radius:2px;overflow:hidden;margin-bottom:4px}
+  .rail-fill{height:100%;width:0;background:var(--sodium);transition:width .3s ease}
+  .railnote{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;color:var(--dim);
+    letter-spacing:.05em;margin:0 0 20px;
+  }
+
+  /* ---------- exercise rows ---------- */
+  .row{
+    display:grid;grid-template-columns:34px 1fr;gap:2px 12px;
+    padding:16px 0;border-bottom:1px solid var(--line);
+    transition:opacity .2s ease;
+  }
+  .row.done{opacity:.4}
+  .idx{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;
+    color:var(--sodium);padding-top:3px;letter-spacing:.02em;
+  }
+  .row.done .idx{color:var(--dim)}
+  .name{
+    font-family:'Oswald','Arial Narrow','Helvetica Neue',sans-serif;font-weight:600;font-size:16.5px;
+    letter-spacing:.045em;text-transform:uppercase;line-height:1.25;
+  }
+  .cue{
+    grid-column:2;font-size:12.5px;color:var(--dim);
+    line-height:1.5;margin-top:4px;
+  }
+  .meta{
+    grid-column:2;display:flex;flex-wrap:wrap;align-items:center;
+    gap:8px 14px;margin-top:11px;
+  }
+  .reps{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;
+    color:var(--chalk);letter-spacing:.03em;
+  }
+  .rest{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:10.5px;
+    color:var(--dim);letter-spacing:.03em;
+  }
+
+  /* ---------- the plates (signature) ---------- */
+  .plates{display:flex;gap:5px;margin-left:auto}
+  .plate{
+    appearance:none;cursor:pointer;padding:0;
+    width:26px;height:30px;border-radius:var(--plate-r);
+    border:1.5px solid rgba(239,233,219,.28);
+    background:transparent;position:relative;
+    transition:background .14s ease,border-color .14s ease,transform .1s ease;
+  }
+  .plate::after{
+    content:"";position:absolute;left:50%;top:50%;
+    width:2px;height:9px;border-radius:1px;
+    transform:translate(-50%,-50%);
+    background:rgba(239,233,219,.28);
+    transition:background .14s ease,height .14s ease;
+  }
+  .plate[aria-pressed="true"]{
+    background:var(--sodium);border-color:var(--sodium);
+  }
+  .plate[aria-pressed="true"]::after{background:rgba(32,24,10,.55);height:13px}
+  .plate:active{transform:scale(.9)}
+  .plate:focus-visible{outline:2px solid var(--sodium);outline-offset:2px}
+
+  /* ---------- footer bits ---------- */
+  .reset{
+    appearance:none;margin-top:22px;width:100%;
+    background:transparent;border:1px solid var(--line);
+    color:var(--dim);border-radius:var(--plate-r);
+    padding:12px;cursor:pointer;
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;
+    transition:color .15s ease,border-color .15s ease;
+  }
+  .reset:hover{color:var(--chalk);border-color:rgba(239,233,219,.3)}
+  .reset:focus-visible{outline:2px solid var(--sodium);outline-offset:2px}
+
+  .rules{margin-top:38px;border-top:1px solid var(--line);padding-top:22px}
+  .rules h2{
+    font-family:'Oswald','Arial Narrow','Helvetica Neue',sans-serif;font-size:12px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--sodium);
+    margin:0 0 14px;
+  }
+  .rule{display:grid;grid-template-columns:78px 1fr;gap:12px;margin-bottom:13px}
+  .rule dt{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;
+    color:var(--dim);letter-spacing:.06em;text-transform:uppercase;
+    padding-top:2px;
+  }
+  .rule dd{margin:0;font-size:13px;line-height:1.55;color:var(--chalk)}
+
+  .status{
+    font-family:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:10px;
+    color:var(--dim);letter-spacing:.05em;text-align:center;
+    margin-top:20px;min-height:14px;
+  }
+
+  @media (max-width:400px){
+    .plate{width:23px;height:28px}
+    .name{font-size:15px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="mark">THE <span>BOARD</span></div>
+    <div class="kit">dumbbells · floor · couch<br>3 days / week</div>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Training days">
+    <button class="tab" role="tab" id="tab-0" aria-controls="day-panel" aria-selected="true" data-day="0">
+      Day 1<span class="sub">chest · back</span>
+    </button>
+    <button class="tab" role="tab" id="tab-1" aria-controls="day-panel" aria-selected="false" data-day="1">
+      Day 2<span class="sub">legs · core</span>
+    </button>
+    <button class="tab" role="tab" id="tab-2" aria-controls="day-panel" aria-selected="false" data-day="2">
+      Day 3<span class="sub">chest · shoulders</span>
+    </button>
+  </div>
+
+  <section id="day-panel" role="tabpanel" aria-labelledby="tab-0">
+    <div class="dayhead">
+      <h1 class="daytitle" id="dayTitle"></h1>
+      <p class="daysub" id="daySub"></p>
+      <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+      <p class="railnote" id="railNote"></p>
+    </div>
+    <div id="rows"></div>
+    <button class="reset" id="resetBtn">Clear this day</button>
+  </section>
+
+  <div class="status" id="status"></div>
+
+  <section class="rules">
+    <h2>How to run it</h2>
+    <dl>
+      <div class="rule"><dt>Spacing</dt><dd>Mon / Wed / Fri, or any pattern with a rest day between sessions.</dd></div>
+      <div class="rule"><dt>Order</dt><dd>Top to bottom, always. The hardest lifts come first while you're fresh; core sits last so a tired midsection doesn't wreck your squat and RDL form.</dd></div>
+      <div class="rule"><dt>Effort</dt><dd>Stop each set 1–3 reps short of failure. On push-ups and core, take the last set all the way.</dd></div>
+      <div class="rule"><dt>Progress</dt><dd>Add one rep per set each week. Once you hit the top of the range on every set, add weight and drop back to the bottom.</dd></div>
+      <div class="rule"><dt>Stuck</dt><dd>No heavier dumbbells? Slow the lowering to 3 seconds, pause 2 seconds at the bottom, or go one limb at a time. Same stimulus, same weight.</dd></div>
+    </dl>
+  </section>
+
+</div>
+
+<script>
+const DAYS = [
+  {
+    title: "Day 1 — Chest & Back",
+    sub: "push, pull, then core · ~45 min",
+    ex: [
+      {n:"Feet-elevated push-up", cue:"Feet on the couch, body in one line. Hits the upper chest.", sets:3, reps:"8–15 reps", rest:"90 s"},
+      {n:"Dumbbell floor press", cue:"Elbows stop at the floor. Press, don't flare.", sets:4, reps:"8–12 reps", rest:"2 min"},
+      {n:"Single-arm dumbbell row", cue:"Hand braced on the couch arm. Elbow to hip.", sets:3, reps:"8–12 / side", rest:"90 s"},
+      {n:"Bent-over reverse flye", cue:"Light weight, lead with the pinkies. Posture work.", sets:3, reps:"12–15 reps", rest:"60 s"},
+      {n:"Weighted crunch", cue:"Dumbbell on the chest. Curl ribs toward hips.", sets:3, reps:"10–15 reps", rest:"60 s"},
+      {n:"Reverse crunch", cue:"Lift the hips off the floor, don't swing the legs.", sets:3, reps:"12–15 reps", rest:"60 s"}
+    ]
+  },
+  {
+    title: "Day 2 — Legs & Core",
+    sub: "heavy first, carries last · ~40 min",
+    ex: [
+      {n:"Goblet squat", cue:"One dumbbell at the chest, elbows inside the knees.", sets:4, reps:"8–12 reps", rest:"2 min"},
+      {n:"Dumbbell Romanian deadlift", cue:"Hips back, weights close to the legs, flat back.", sets:3, reps:"8–12 reps", rest:"2 min"},
+      {n:"Bulgarian split squat", cue:"Back foot on the couch. Drop the knee straight down.", sets:3, reps:"8–12 / side", rest:"90 s"},
+      {n:"Towel rollout", cue:"Hands on a towel, glutes squeezed, no arching.", sets:3, reps:"6–12 reps", rest:"60 s"},
+      {n:"Suitcase carry", cue:"One dumbbell, walk, stay upright. Don't lean.", sets:3, reps:"30–40 s / side", rest:"60 s"}
+    ]
+  },
+  {
+    title: "Day 3 — Chest & Shoulders",
+    sub: "stretch-focused chest · ~45 min",
+    ex: [
+      {n:"Deficit push-up", cue:"Hands on the dumbbell handles so the chest sinks below.", sets:3, reps:"8–15 reps", rest:"90 s"},
+      {n:"Dumbbell floor press", cue:"Lighter than Day 1. Lower for a slow 3-count.", sets:3, reps:"10–15 reps", rest:"90 s"},
+      {n:"Single-arm dumbbell row", cue:"Higher reps today. Full stretch at the bottom.", sets:3, reps:"10–15 / side", rest:"90 s"},
+      {n:"Prone Y-raise", cue:"Face-down, arms in a Y, thumbs up. Bodyweight is plenty.", sets:3, reps:"12–15 reps", rest:"45 s"},
+      {n:"Reverse crunch", cue:"Controlled on the way down. That's the hard half.", sets:3, reps:"12–15 reps", rest:"60 s"},
+      {n:"Long-lever plank", cue:"Elbows further forward than a normal plank.", sets:3, reps:"30–60 s", rest:"45 s"}
+    ]
+  }
+];
+
+const KEY = "training-board-progress";
+const today = new Date().toISOString().slice(0,10);
+
+let state = DAYS.map(d => d.ex.map(e => new Array(e.sets).fill(false)));
+let current = 0;
+let canSave = true;
+
+const rowsEl   = document.getElementById("rows");
+const titleEl  = document.getElementById("dayTitle");
+const subEl    = document.getElementById("daySub");
+const fillEl   = document.getElementById("railFill");
+const noteEl   = document.getElementById("railNote");
+const statusEl = document.getElementById("status");
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      if(saved.date === today && Array.isArray(saved.state)){
+        // shape-check before trusting it
+        const ok = saved.state.length === DAYS.length &&
+          saved.state.every((d,i) => d.length === DAYS[i].ex.length &&
+            d.every((s,j) => s.length === DAYS[i].ex[j].sets));
+        if(ok) state = saved.state;
+      }
+    }
+  }catch(err){
+    // no saved session yet, or storage unavailable — start clean
+  }
+  render();
+}
+
+function save(){
+  if(!canSave) return;
+  try{
+    localStorage.setItem(KEY, JSON.stringify({date: today, state}));
+    statusEl.textContent = "";
+  }catch(err){
+    canSave = false;
+    statusEl.textContent = "Saving is off — your ticks last until you close this.";
+  }
+}
+
+function render(){
+  const day = DAYS[current];
+  titleEl.textContent = day.title;
+  subEl.textContent = day.sub;
+
+  rowsEl.innerHTML = "";
+  day.ex.forEach((e, i) => {
+    const done = state[current][i].every(Boolean);
+    const row = document.createElement("div");
+    row.className = "row" + (done ? " done" : "");
+
+    const idx = document.createElement("div");
+    idx.className = "idx";
+    idx.textContent = String(i+1).padStart(2,"0");
+
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = e.n;
+
+    const cue = document.createElement("p");
+    cue.className = "cue";
+    cue.textContent = e.cue;
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+
+    const reps = document.createElement("span");
+    reps.className = "reps";
+    reps.textContent = e.sets + " × " + e.reps;
+
+    const rest = document.createElement("span");
+    rest.className = "rest";
+    rest.textContent = "rest " + e.rest;
+
+    const plates = document.createElement("div");
+    plates.className = "plates";
+    for(let s = 0; s < e.sets; s++){
+      const b = document.createElement("button");
+      b.className = "plate";
+      b.setAttribute("aria-pressed", state[current][i][s] ? "true" : "false");
+      b.setAttribute("aria-label", "Set " + (s+1) + " of " + e.sets + ", " + e.n);
+      b.addEventListener("click", () => {
+        state[current][i][s] = !state[current][i][s];
+        save();
+        render();
+      });
+      plates.appendChild(b);
+    }
+
+    meta.append(reps, rest, plates);
+    row.append(idx, name, cue, meta);
+    rowsEl.appendChild(row);
+  });
+
+  const flat = state[current].flat();
+  const doneCount = flat.filter(Boolean).length;
+  const pct = flat.length ? Math.round(doneCount / flat.length * 100) : 0;
+  fillEl.style.width = pct + "%";
+  noteEl.textContent = doneCount + " of " + flat.length + " sets logged" + (pct === 100 ? " — done." : "");
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    current = Number(tab.dataset.day);
+    document.querySelectorAll(".tab").forEach(t =>
+      t.setAttribute("aria-selected", t === tab ? "true" : "false"));
+    document.getElementById("day-panel").setAttribute("aria-labelledby", tab.id);
+    render();
+  });
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  state[current] = DAYS[current].ex.map(e => new Array(e.sets).fill(false));
+  save();
+  render();
+});
+
+load();
+</script>
+</body>
+</html>
